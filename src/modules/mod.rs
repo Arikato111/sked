@@ -1,3 +1,1 @@
-pub fn work() {
-
-}
+mod brute_path;

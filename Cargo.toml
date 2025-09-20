@@ -12,5 +12,11 @@ include = ["src/*"]
 
 
 [dependencies]
+anyhow = "1.0.100"
 clap = { version = "4.5.37", features = ["derive"] }
 clap_complete = "4.5.48"
+reqwest = "0.12.23"
+tokio = { version = "1.47.1", features = ["full"] }
+
+[lib]
+doctest = false

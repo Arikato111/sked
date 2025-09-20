@@ -1,8 +1,15 @@
 use std::fs;
 
+pub enum WordlistType {
+    Range(u32, u32),
+    File(String),
+}
+
+/// Manage about Wordlist.
 pub struct Wordlist;
 
 impl Wordlist {
+    /// Create wordlists from range number
     pub fn range(from: u32, to: u32) -> Vec<String> {
         let mut wordlists: Vec<String> = Vec::new();
 
@@ -13,6 +20,7 @@ impl Wordlist {
         wordlists
     }
 
+    /// Get wordlists from file.
     pub fn file(path: String) -> Vec<String> {
         let read_string = fs::read_to_string(path).expect("Failed to read wordlists file");
         let content: Vec<&str> = read_string.split("\n").collect();

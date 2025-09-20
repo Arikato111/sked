@@ -24,7 +24,8 @@ enum Command {
     },
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let args = Args::parse();
     if let Some(command) = args.command {
         match command {
