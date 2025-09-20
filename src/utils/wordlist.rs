@@ -28,15 +28,20 @@ mod tests {
     #[test]
     fn wordlist_file() {
         let r = Wordlist::file("./Cargo.toml".to_string());
-        for msg in r {
-            println!("{}", msg);
-        }
+        let content = r.join("\n");
+        let cargo_toml = fs::read_to_string("./Cargo.toml").expect("Failed to read wordlists file");
+        assert_eq!(content, cargo_toml);
     }
 
     #[test]
     fn wordlist_range() {
         let wordlist = Wordlist::range(0, 20);
-        println!("{:?}", wordlist);
-        assert_eq!(0, 0)
+        assert_eq!(
+            wordlist,
+            vec![
+                "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14",
+                "15", "16", "17", "18", "19", "20"
+            ]
+        )
     }
 }
