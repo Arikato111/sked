@@ -1,6 +1,6 @@
 use clap::{CommandFactory, Parser, Subcommand};
 use clap_complete::{Shell, generate};
-use htils::{
+use sked::{
     constant::{BANNER, BIN_NAME},
     modules::BrutePath,
 };
