@@ -1,15 +1,15 @@
 [package]
 name = "sked"
 description = "utilities pack for pentest"
+authors = ["Nawasan <nawasan.dev@gmail.com>"]
 license = "GPL-3.0-only"
 version = "0.0.1"
 edition = "2024"
-repository = "https://github.com/Arikato111/htil"
+repository = "https://github.com/Arikato111/sked"
 readme = "README.md"
+categories = ["command-line-utilities"]
 
-categories = []
-include = ["src/*"]
-
+include = ["src/", "LICENSE"]
 
 [dependencies]
 anyhow = "1.0.100"
