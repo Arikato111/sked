@@ -4,8 +4,8 @@ use tokio::fs;
 /// Download file from url.
 ///
 /// ```
-/// use tokio_test;
-/// use crate::htils::utils::download_file;
+/// # use tokio_test;
+/// # use crate::htils::utils::download_file;
 /// # tokio_test::block_on(async {
 /// let url = "https://crates.io/assets/cargo.png".to_string();
 /// let out_path = "/tmp/".to_string();
