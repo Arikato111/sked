@@ -39,7 +39,7 @@ enum Command {
         parallel: bool,
         /// Output file to save results or downloaded files.
         #[arg(short, long, default_value = "./")]
-        out: String,
+        out: Option<String>,
     },
 }
 

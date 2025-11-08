@@ -1,4 +1,4 @@
-use crate::utils::{Log, WordlistType, download_file};
+use crate::utils::{Log, WordlistType, WriteFile, download_file};
 
 #[derive(Default, Clone)]
 /// ## Accepted http status codes.
@@ -52,7 +52,7 @@ pub struct BrutePath {
     /// Run in parallel mode.
     parallel: bool,
     /// Output file to save results or downloaded files.
-    out: String
+    out: Option<String>,
 }
 
 impl BrutePath {
@@ -62,7 +62,7 @@ impl BrutePath {
         accept_status: &str,
         download: bool,
         parallel: bool,
-        out: String
+        out: Option<String>,
     ) -> Self {
         let wordlist = match WordlistType::parse(wordlist) {
             Ok(wl) => wl,
@@ -82,7 +82,7 @@ impl BrutePath {
             accept_status,
             download,
             parallel,
-            out
+            out,
         }
     }
 
@@ -92,7 +92,11 @@ impl BrutePath {
         for wordlist in wordlists {
             let url_clone = self.url.clone();
             let accept_status_clone = self.accept_status.clone();
-            let out_path = self.out.clone();
+            let is_out_path_set = self.out.is_some();
+            let out_path = match self.out.clone() {
+                Some(as_) => as_,
+                None => "./".to_string(),
+            };
             let download_clone = self.download;
 
             let t = tokio::spawn(async move {
@@ -112,15 +116,25 @@ impl BrutePath {
                     match &accept_status_clone {
                         AcceptStatus::All => {
                             Log::print_found(&url, res.status());
+                            // check --download flag
                             if download_clone {
+                                // download web page or contents to out_path
                                 let _ = download_file(url, out_path).await;
+                            } else if is_out_path_set {
+                                // if --out is set without --download, save results to file
+                                save_log_to_file(&url, res, &out_path).await;
                             }
                         }
                         AcceptStatus::Ok => {
                             if res.status().is_success() {
                                 Log::print_found(&url, res.status());
+                                // download web page or contents to out_path
                                 if download_clone {
+                                    // download web page or contents to out_path
                                     let _ = download_file(url, out_path).await;
+                                } else if is_out_path_set {
+                                    // if --out is set without --download, save results to file
+                                    save_log_to_file(&url, res, &out_path).await;
                                 }
                             }
                         }
@@ -129,6 +143,8 @@ impl BrutePath {
                                 Log::print_found(&url, res.status());
                                 if download_clone {
                                     let _ = download_file(url, out_path).await;
+                                } else if is_out_path_set {
+                                    save_log_to_file(&url, res, &out_path).await;
                                 }
                             }
                         }
@@ -153,7 +169,11 @@ impl BrutePath {
             let client = reqwest::Client::new();
             let url = self.url.replace(":path:", &wordlist);
             let res = client.get(&url).send().await;
-            let out_path = self.out.clone();
+            let is_out_path_set = self.out.is_some();
+            let out_path = match self.out.clone() {
+                Some(as_) => as_,
+                None => "./".to_string(),
+            };
 
             let res = match res {
                 Ok(r) => r,
@@ -169,6 +189,8 @@ impl BrutePath {
                         Log::print_found(&url, res.status());
                         if self.download {
                             let _ = download_file(url, out_path.clone()).await;
+                        } else if is_out_path_set {
+                            save_log_to_file(&url, res, &out_path).await;
                         }
                     }
                     AcceptStatus::Ok => {
@@ -176,6 +198,8 @@ impl BrutePath {
                             Log::print_found(&url, res.status());
                             if self.download {
                                 let _ = download_file(url, out_path).await;
+                            } else if is_out_path_set {
+                                save_log_to_file(&url, res, &out_path).await;
                             }
                         }
                     }
@@ -184,6 +208,8 @@ impl BrutePath {
                             Log::print_found(&url, res.status());
                             if self.download {
                                 let _ = download_file(url, out_path).await;
+                            } else if is_out_path_set {
+                                save_log_to_file(&url, res, &out_path).await;
                             }
                         }
                     }
@@ -201,4 +227,11 @@ impl BrutePath {
             self.run_normal().await;
         }
     }
+}
+
+async fn save_log_to_file(url: &String, res: reqwest::Response, out_path: &String) {
+    let write_file = WriteFile::new(out_path.clone());
+    let _ = write_file
+        .append(Log::format(&url, res.status()).as_bytes().to_vec().as_ref())
+        .await;
 }
